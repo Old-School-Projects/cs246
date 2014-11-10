@@ -68,3 +68,7 @@ MenuBar {
     -fx-background-fills: #ccffff;
     -fx-border-color: #ccffff;
 }
+
+#scriptTab{
+    -fx-background-color: white;
+}

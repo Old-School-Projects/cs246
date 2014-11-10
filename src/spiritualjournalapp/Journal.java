@@ -49,36 +49,6 @@ public class Journal {
     private List<String> topicList;
     private HashMap<String, String> mapOfTopics;
     
-
-    /**************************************************
-    * MAIN
-     * @param args
-     * @throws java.lang.Exception
-    **************************************************/
-    /*public static void main(String[] args) throws Exception{
-        new Journal().run();
-    }
-    
-    public void run() throws Exception{
-        String file = "/Users/paul/ScripFinderTestApp/src/spiritualjournalapp/textFile.txt";
-        String newFile = "/Users/paul/ScripFinderTestApp/src/spiritualjournalapp/newFile.txt";
-        
-        // read text file into a list of strings
-        List<String>lines = readTextFile(file);
-        
-        // find all the necessary stuff in the entries
-        findEntries(lines);
-        
-        // build an XML document
-        Document doc = buildXMLDocument(entryList);
-        
-        // save the XML document to a file
-        saveDocument(doc);
-        
-        // write to a file for user to read
-        writeToFile(newFile);
-    }
-    */
     /*************************************************
     * CONSTRUCTOR: create arrayList
     *************************************************/
@@ -163,6 +133,36 @@ public class Journal {
         return lists;
     }
     
+    
+    /*********************************************
+     * SEARCH ENTRIES
+     * @param item
+     * @return 
+     **********************************************/
+    public List<Entry> searchEntries(String item){
+        List<Entry> list = new ArrayList<>();
+        for (Entry entry : entryList){
+            for (Scripture scrip : entry.getScripList()){
+                if (scrip.getBook().equals(item)){ 
+                    list.add(entry);
+                }
+                
+            }
+            
+            for (String topic : entry.getTopics()){
+                if (topic.equals(item)){
+                    list.add(entry);
+                }
+            }
+            
+            if (entry.getDate().equals(item)){
+                list.add(entry);
+            }
+            
+        }
+
+        return list;
+    }
     /*******************************************
     * FILL HASH MAP
     *******************************************/
@@ -170,8 +170,35 @@ public class Journal {
         // fill HashMap with correct values
         String fileName = "/Users/paul/ScripFinderTestApp/src/spiritualjournalapp/topics.txt";
         
-        String fileLine = "";
+        String scripFile = "";
+        String line = "";
+        
+        PropertiesClass p = new PropertiesClass();
+        scripFile = p.getTopicFile();
+        
         try{
+            BufferedReader reader = new BufferedReader(new FileReader(scripFile));
+            while ((line = reader.readLine()) != null){
+               
+                String [] parts = null;
+                String [] parts2 = null;
+                parts = line.split(":");
+                String value = parts[0];
+                parts2 = parts[1].split(",");
+                
+                
+                for (String term : parts2){
+                    mapOfTopics.put(term, value);  
+                }
+                
+            }
+        } catch (IOException e){
+            System.out.println("Error reading list from file");
+        }
+        
+        
+        
+        /*try{
             BufferedReader reader = new BufferedReader(new FileReader(fileName));
             while ((fileLine = reader.readLine()) != null){
                
@@ -189,7 +216,7 @@ public class Journal {
             }
         } catch (IOException e){
             System.out.println("Error reading list from file");
-        }
+        }*/
         
     }
     
@@ -213,9 +240,9 @@ public class Journal {
             
             
             if (content.contains(term)){
-                //if (!(entry.getTopics().contains(mapOfTopics.get(term)))){
+                if (!(entry.getTopics().contains(mapOfTopics.get(term)))){
                     entry.addTopic(mapOfTopics.get(term));          
-                //}
+                }
             }
             }
             
@@ -228,7 +255,6 @@ public class Journal {
     /************************************************
     * FIND ENTRIES IN TEXT FILE
      * @param userContent
-     * @param lists
     ************************************************/
     public void findEntriesFromText(String userContent){
         String pat_B_num_c_num = "(\\w*)(\\s)(\\d+)(\\W*)(\\d+)";
@@ -250,7 +276,6 @@ public class Journal {
             Date date = new Date();
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd HH:mm");
             entry.setDate(sdf.format(date));
-
             
             // find the scriptures
             Matcher m1 = p1.matcher(lists.get(i));                                            
@@ -296,15 +321,12 @@ public class Journal {
             
              // find the topics
              findTopics();
-  
-            
             
             content = content + lists.get(i);
         }
         entry.setContent(content); // add it one more time for the last entry
         findTopics(); // same here
-        entryList.add(entry);
-        
+        entryList.add(entry);   
     
     }
     
@@ -404,6 +426,7 @@ public class Journal {
             
             content = content + lists.get(i);
         }
+        
         entry.setContent(content); // add it one more time for the last entry
         findTopics(); // same here
         entryList.add(entry);
@@ -489,7 +512,7 @@ public class Journal {
         
         StreamResult result = new StreamResult(file);
         
-        t.transform(source, result);
+         t.transform(source, result);
         
         System.out.println("File saved!");
         
@@ -526,7 +549,7 @@ public class Journal {
     ****************************************/
     public void readXMLfile(String fileName) throws Exception {
         
-        fileName = "/Users/paul/ScripFinderTestApp/src/spiritualjournalapp/xmlFile.xml";
+        //fileName = "/Users/paul/ScripFinderTestApp/src/spiritualjournalapp/xmlFile.xml";
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.parse(fileName);
